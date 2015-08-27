@@ -35,5 +35,38 @@ public class PlayerMovement : MonoBehaviour {
      *      A value to keep track of the player's movement speed and direction
      *      You will probably need to use the Update function as well as create functions for moving platforms and enemies
      */
+	private KeyboardInput key;
+	private Vector3 moveDirection = Vector3.zero;
+	public float speed = 2.0F;
+	private bool isOnMovingPlataform = false;
+	private MovingPlatform plataform;
+	private CharacterController controller;
+	void Update()
+	{
+		key = GetComponent<KeyboardInput> ();
+		controller = GetComponent<CharacterController> ();
+		
+		if (controller.isGrounded && !isOnMovingPlataform) {
+			moveDirection = new Vector3 (Input.GetAxis ("Horizontal"), 0, 0);
+			moveDirection = transform.TransformDirection(moveDirection);
+			moveDirection *= speed;
+			if(key.JumpButtonPressedThisFrame)
+				moveDirection.y = 10.0F;
+		}
+		moveDirection.y -= 30.0F * Time.deltaTime;
+		controller.Move (moveDirection * Time.deltaTime);
+	}
+	void OnTriggerEnter(Collider collider){
+		Debug.Log ("Collide: " + collider.gameObject.name);
+		plataform = GetComponent<MovingPlatform> ();
+		if (collider.gameObject.name == "Moving Platform Parent") {
+			Debug.Log ("platafor");
+			isOnMovingPlataform = true;
+			moveDirection = new Vector3 (plataform.transform.position.x, plataform.transform.position.y, plataform.transform.position.z);
+			moveDirection.y -= 20.0F * Time.deltaTime;
+			controller.Move (moveDirection * Time.deltaTime);
+		} else if (collider.gameObject.name == "Enemy Parent")
+			Time.timeScale = 0;
+	}
 
 }
